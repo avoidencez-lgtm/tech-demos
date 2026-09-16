@@ -8,7 +8,8 @@ Each approved pick lands in `apps/<slug>/` as a small interactive demo. Pull req
 
 ```
 apps/
-  <slug>/     # one demo per folder
+  magnitude-model-profiler/   # Magnitude-inspired local model ranking playground
+  <slug>/                     # one demo per folder
 ```
 
 ## Workflow
