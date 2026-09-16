@@ -17,7 +17,7 @@
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
   --radius: 18px;
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: "Instrument Sans", ui-sans-serif, system-ui, sans-serif;
+  --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 * {
@@ -38,7 +38,7 @@ body {
     var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 
 button,
@@ -97,8 +97,8 @@ a {
 h1 {
   margin: 0;
   font-size: 28px;
-  line-height: 1.1;
-  letter-spacing: -0.04em;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
 }
 
 .lede {
@@ -186,7 +186,7 @@ h1 {
 
 .preset-name {
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .preset-sub {
@@ -428,7 +428,7 @@ input[type="range"]::-webkit-slider-thumb {
 .card h2 {
   margin: 2px 0 0;
   font-size: 20px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
 }
 
 .meta {

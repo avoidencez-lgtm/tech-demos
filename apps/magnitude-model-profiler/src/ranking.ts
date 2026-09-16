@@ -20,7 +20,7 @@ function estimateToks(hw: HardwareProfile, weightGb: number, speculative: boolea
   const fullyOnAccel = weightGb <= accel;
   const spillPenalty = fullyOnAccel ? 1 : hw.kind === "apple" ? 0.72 : 0.32;
   const efficiency =
-    hw.kind === "apple" ? 0.52 : hw.kind === "nvidia" ? 0.62 : hw.kind === "cloud" ? 0.7 : 0.22;
+    hw.kind === "apple" ? 0.78 : hw.kind === "nvidia" ? 0.62 : hw.kind === "cloud" ? 0.7 : 0.22;
   const spec = speculative ? 1.32 : 1;
   const mid = (hw.bandwidthGBs / Math.max(weightGb, 0.8)) * efficiency * spillPenalty * spec;
   const lo = Math.max(4, Math.round(mid * 0.86));
@@ -29,8 +29,15 @@ function estimateToks(hw: HardwareProfile, weightGb: number, speculative: boolea
 }
 
 function speedScore(tokHi: number) {
-  // ~8 tok/s is barely usable for agents; ~80+ feels snappy.
-  return clamp(((tokHi - 6) / 90) * 100);
+  // Soft cap so tiny models do not dominate agent rankings.
+  const usable = Math.max(0, tokHi - 4);
+  return clamp(100 * (1 - Math.exp(-usable / 38)));
+}
+
+function occupancyBonus(used: number, pool: number) {
+  const ratio = used / Math.max(pool, 1);
+  if (ratio <= 0 || ratio > 0.95) return 0;
+  return 15 * Math.exp(-(((ratio - 0.34) / 0.2) ** 2));
 }
 
 function memoryScore(hw: HardwareProfile, used: number, weightGb: number) {
@@ -61,19 +68,25 @@ export function rankModels(hw: HardwareProfile, preference: number): RankedModel
     const pool =
       hw.kind === "nvidia" || hw.kind === "cloud" ? hw.gpuVramGb + hw.ramGb * 0.35 : hw.ramGb * 0.88;
     const headroomGb = Number((pool - memoryUsedGb).toFixed(1));
-    const fits = headroomGb >= 0.4;
     const tokPerSec = estimateToks(hw, model.weightGb, model.speculative);
+    const fits = headroomGb >= 0.4 && tokPerSec[1] >= 8;
     const scores = {
       speed: Math.round(speedScore(tokPerSec[1])),
       accuracy: Math.round(accuracyScore(model.baseAccuracy, model.quantKind, model.bits)),
       intelligence: Math.round(model.intelligence),
       memory: Math.round(memoryScore(hw, memoryUsedGb, model.weightGb)),
     };
+    const qatBonus = model.quantKind === "qat" ? 7 : 0;
+    const sizeBonus = occupancyBonus(memoryUsedGb, pool);
+    const pacePenalty = tokPerSec[1] < 12 ? -14 : tokPerSec[1] < 18 ? -5 : 0;
     const composite = fits
       ? scores.speed * speedW +
         scores.accuracy * accW +
         scores.intelligence * intelW +
-        scores.memory * memW
+        scores.memory * memW +
+        qatBonus +
+        sizeBonus +
+        pacePenalty
       : scores.intelligence * 0.15 - 40;
 
     return {
@@ -95,12 +108,18 @@ export function rankModels(hw: HardwareProfile, preference: number): RankedModel
   });
 
   const fitting = scored.filter((m) => m.fits);
-  const fastest = fitting.reduce((best, m) => (m.scores.speed > best.scores.speed ? m : best), fitting[0]);
-  const smartest = fitting.reduce(
-    (best, m) => (m.scores.intelligence > best.scores.intelligence ? m : best),
-    fitting[0],
+  const fastest = fitting.reduce<RankedModel | undefined>(
+    (best, m) => (!best || m.scores.speed > best.scores.speed ? m : best),
+    undefined,
   );
-  const lightest = fitting.reduce((best, m) => (m.weightGb < best.weightGb ? m : best), fitting[0]);
+  const smartest = fitting.reduce<RankedModel | undefined>(
+    (best, m) => (!best || m.scores.intelligence > best.scores.intelligence ? m : best),
+    undefined,
+  );
+  const lightest = fitting.reduce<RankedModel | undefined>(
+    (best, m) => (!best || m.weightGb < best.weightGb ? m : best),
+    undefined,
+  );
   const balanced = fitting[0];
 
   return scored.map((model, i) => {

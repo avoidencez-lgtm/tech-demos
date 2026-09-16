@@ -68,7 +68,7 @@ export default function App() {
   const preset = PRESETS.find((p) => p.id === presetId) ?? PRESETS[0];
   const hardware = useMemo(() => fromPreset(presetId, ramGb, gpuVramGb), [presetId, ramGb, gpuVramGb]);
   const ranked = useMemo(() => rankModels(hardware, preference), [hardware, preference]);
-  const selected = ranked.find((m) => m.id === selectedId) ?? ranked.find((m) => m.fits) ?? ranked[0];
+  const paired = ranked.find((m) => m.id === selectedId) ?? ranked.find((m) => m.fits) ?? ranked[0];
   const harness = HARNESSES.find((h) => h.id === harnessId) ?? null;
   const fitting = ranked.filter((m) => m.fits).length;
 
@@ -233,7 +233,7 @@ export default function App() {
               {ranked.map((model) => (
                 <article
                   key={model.id}
-                  className={`panel card${selected?.id === model.id ? " selected" : ""}${model.fits ? "" : " nofit"}`}
+                  className={`panel card${selectedId === model.id ? " selected" : ""}${model.fits ? "" : " nofit"}`}
                 >
                   <div className="card-top">
                     <div>
@@ -278,11 +278,11 @@ export default function App() {
                     </span>
                     <button
                       type="button"
-                      className={`pick${selected?.id === model.id ? "" : " ghost"}`}
+                      className={`pick${selectedId === model.id ? "" : " ghost"}`}
                       onClick={() => setSelectedId(model.id)}
                       disabled={!model.fits}
                     >
-                      {selected?.id === model.id ? "Selected" : "Use this"}
+                      {selectedId === model.id ? "Selected" : "Use this"}
                     </button>
                   </div>
                 </article>
@@ -307,16 +307,16 @@ export default function App() {
                 </button>
               ))}
             </div>
-            {selected && harness && (
+            {paired && harness && (
               <div className="pair">
                 <h3>
-                  {selected.name} → {harness.name}
+                  {paired.name} → {harness.name}
                 </h3>
                 <p>
                   {harness.hint}. Magnitude would write {harness.configHint} and point the agent at
                   a local OpenAI-compatible server. Nothing is installed in this demo.
                 </p>
-                <pre>{mockConfig(selected, harness)}</pre>
+                <pre>{mockConfig(paired, harness)}</pre>
               </div>
             )}
           </section>

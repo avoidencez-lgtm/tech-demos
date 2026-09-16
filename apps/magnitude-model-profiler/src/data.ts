@@ -62,7 +62,7 @@ export const MODELS: ModelConfig[] = [
     bits: 4,
     contextK: 50,
     weightGb: 4.6,
-    intelligence: 62,
+    intelligence: 68,
     baseAccuracy: 88,
     speculative: false,
     vision: true,
