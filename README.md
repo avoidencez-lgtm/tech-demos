@@ -8,8 +8,11 @@ Each approved pick lands in `apps/<slug>/` as a small interactive demo. Pull req
 
 ```
 apps/
-  <slug>/     # one demo per folder
+  jev-ultrafast-browser/  # TypeSafe Jev: indexed DOM action space, one-shot op+target
+  <slug>/                 # one demo per folder
 ```
+
+Run the Jev playground with `cd apps/jev-ultrafast-browser && npm install && npm run dev`.
 
 ## Workflow
 
