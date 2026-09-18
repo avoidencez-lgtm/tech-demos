@@ -332,7 +332,7 @@ h1 {
   background:
     linear-gradient(180deg, rgba(126, 200, 255, 0.06), transparent 28%),
     #101720;
-  min-height: 520px;
+  min-height: 560px;
 }
 
 .flights-brand {
@@ -355,11 +355,21 @@ h1 {
 }
 
 .trip-row,
+.trip-group,
 .fields,
 .results {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.trip-group {
+  position: relative;
+  align-items: center;
+  padding: 8px 8px 8px 32px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 14px;
 }
 
 .chip,
@@ -390,14 +400,15 @@ h1 {
 }
 
 .chip[data-on='true'] {
-  background: rgba(126, 200, 255, 0.12);
-  border-color: rgba(126, 200, 255, 0.4);
+  background: rgba(126, 200, 255, 0.2);
+  border-color: var(--sky);
+  color: #d7f0ff;
 }
 
 .fields {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 8px;
 }
 
@@ -434,12 +445,19 @@ h1 {
 }
 
 .search-btn {
-  padding: 10px 16px;
+  margin-top: 8px;
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px 12px 28px;
   background: var(--sky);
   color: #082033;
   border-color: transparent;
   font-weight: 650;
-  min-width: 92px;
+  font-size: 15px;
 }
 
 .badge-n {
@@ -462,11 +480,16 @@ h1 {
 [data-hot='true'] {
   box-shadow: 0 0 0 3px var(--gold-dim);
   border-color: var(--gold);
+  background: rgba(240, 193, 75, 0.08);
 }
 
 [data-done='true'] {
   box-shadow: 0 0 0 3px var(--jev-dim);
   border-color: rgba(141, 255, 106, 0.5);
+}
+
+.cal-day[data-goal='true'] {
+  background: rgba(126, 200, 255, 0.12);
 }
 
 .suggest-list,
@@ -572,7 +595,9 @@ h1 {
   display: flex;
   flex-direction: column;
   padding: 14px 14px 12px;
-  gap: 12px;
+  gap: 10px;
+  max-height: 760px;
+  overflow: auto;
 }
 
 .decision-head h2 {

@@ -67,12 +67,12 @@ function FlightsMock({
 
       {page.kind !== 'loading' && (
         <>
-          <div className="trip-row">
-            <div className="chip" data-on={page.trip === 'round'} {...mark(1)}>
-              {badge(1)}
+          <div className="trip-group" {...mark(1)}>
+            {badge(1)}
+            <div className="chip" data-on={page.trip === 'round'}>
               Round trip
             </div>
-            <div className="chip" data-on={page.trip === 'oneway'} {...mark(1)}>
+            <div className="chip" data-on={page.trip === 'oneway'}>
               One way
             </div>
             <div className="chip">Multi-city</div>
@@ -98,11 +98,11 @@ function FlightsMock({
               <strong>{page.date || 'Select date'}</strong>
               {page.trip === 'round' && <em>Return empty · [5]</em>}
             </div>
-            <button className="search-btn" type="button" {...mark(searchIndex(page))}>
-              {badge(searchIndex(page))}
-              Search
-            </button>
           </div>
+          <button className="search-btn" type="button" {...mark(searchIndex(page))}>
+            {badge(searchIndex(page))}
+            Search flights
+          </button>
           <div className="trip-row" style={{ marginTop: 8 }}>
             <div className="chip" {...(travelerIndex(page) !== undefined ? mark(travelerIndex(page)!) : {})}>
               {travelerIndex(page) !== undefined ? badge(travelerIndex(page)!) : null}
@@ -172,6 +172,7 @@ function FlightsMock({
                 <div
                   key={day}
                   className="cal-day"
+                  data-goal={day === 20}
                   {...(indexed ? mark(indexed) : {})}
                 >
                   {indexed ? badge(indexed) : null}
@@ -263,7 +264,7 @@ export default function App() {
   const step: Step | undefined = STEPS[cursor]
   const visibleStep = step ?? STEPS[0]
   const hot = targetFor(visibleStep)
-  const totals = totalsThrough(phase === 'idle' ? 0 : phase === 'deciding' ? cursor : cursor + 1)
+  const totals = totalsThrough(phase === 'idle' ? 0 : cursor + 1)
   const finished = phase === 'done' && cursor === STEPS.length - 1
 
   useEffect(() => {
@@ -319,14 +320,17 @@ export default function App() {
       .sort((a, b) => b.value - a.value)
   }, [visibleStep])
 
-  const clickItems = compatibleTargets(visibleStep.actions, 'CLICK').map((action) => ({
-    key: String(action.index),
-    label: `[${action.index}] ${action.name}`,
-    value:
-      action.index === visibleStep.decision.clickTarget
-        ? 0.76
-        : Math.max(0.04, 0.24 / Math.max(1, compatibleTargets(visibleStep.actions, 'CLICK').length)),
-  }))
+  const clickItems = compatibleTargets(visibleStep.actions, 'CLICK')
+    .map((action) => ({
+      key: String(action.index),
+      label: `[${action.index}] ${action.name}`,
+      value:
+        action.index === visibleStep.decision.clickTarget
+          ? 0.76
+          : Math.max(0.04, 0.24 / Math.max(1, compatibleTargets(visibleStep.actions, 'CLICK').length)),
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5)
 
   const typeItems = compatibleTargets(visibleStep.actions, 'TYPE_TEXT').map((action) => ({
     key: String(action.index),
